@@ -1,4 +1,4 @@
-window.onload = function () {
+window.onload = () => {
   const canvasWidth = 900;
   const canvasHeight = 600;
   const blockSize = 30;
@@ -12,11 +12,9 @@ window.onload = function () {
   let snakee;
   let applee;
   let score;
-  let timeOut;
+  let timeOut; 
 
-  init();
-
-  function init() {
+  const init = () => {
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     canvas.style.border = "30px solid gray";
@@ -27,7 +25,9 @@ window.onload = function () {
     launch()
   }
 
-  function launch() {
+  
+
+  const launch = () => {
     snakee = new Snake([
       [6, 4],
       [5, 4],
@@ -42,7 +42,7 @@ window.onload = function () {
     refreshCanvas();
   }
 
-  function refreshCanvas() {
+  const refreshCanvas = () => {
     snakee.advance();
     if (snakee.checkCollision()) {
       gameOver();
@@ -67,11 +67,11 @@ window.onload = function () {
     }
   }
 
-  function speedUp() {
+  const speedUp = () => {
     delay /= 2;
   }
 
-  function gameOver() {
+  const gameOver = () => {
     ctx.save();
     ctx.font = "bold 70px sans-serif";
     ctx.fillStyle = "#000";
@@ -87,9 +87,7 @@ window.onload = function () {
     ctx.restore();
   }
 
-
-
-  function drawScore() {
+  const drawScore = () => {
     ctx.save();
     ctx.font = "bold 200px sans-serif";
     ctx.fillStyle = "gray";
@@ -99,7 +97,7 @@ window.onload = function () {
     ctx.restore();
   }
 
-  function drawBlock(ctx, position) {
+  const drawBlock = (ctx, position) => {
     const x = position[0] * blockSize;
     const y = position[1] * blockSize;
     ctx.fillRect(x, y, blockSize, blockSize);
@@ -231,7 +229,7 @@ window.onload = function () {
 
   }
 
-  document.onkeydown = function handleKeyDown(e) {
+  document.onkeydown = (e) => {
     const key = e.keyCode;
     let newDirection;
     switch (key) {
@@ -255,4 +253,6 @@ window.onload = function () {
     }
     snakee.setDirection(newDirection);
   };
+
+  init();
 }
