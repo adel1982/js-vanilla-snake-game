@@ -2,17 +2,17 @@ window.onload = () => {
   const canvasWidth = 900;
   const canvasHeight = 600;
   const blockSize = 30;
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
   const widthInBlocks = canvasWidth / blockSize;
   const heightInBlocks = canvasHeight / blockSize;
   const centreX = canvasWidth / 2;
   const centreY = canvasHeight / 2;
   let delay;
   let snakee;
-  let applee;
+  let apple;
   let score;
-  let timeOut; 
+  let timeOut;
 
   const init = () => {
     canvas.width = canvasWidth;
@@ -22,38 +22,30 @@ window.onload = () => {
     canvas.style.display = "block";
     canvas.style.backgroundColor = "#ddd";
     document.body.appendChild(canvas);
-    launch()
-  }
-
-  
+    launch();
+  };
 
   const launch = () => {
-    snakee = new Snake([
-      [6, 4],
-      [5, 4],
-      [4, 4],
-      [3, 4],
-      [2, 4]
-    ], "right");
-    applee = new Apple([10, 10]);
+    snakee = new Snake([[6, 4], [5, 4], [4, 4], [3, 4], [2, 4]], "right");
+    apple = new Apple([10, 10]);
     score = 0;
     clearTimeout(timeOut);
     delay = 100;
     refreshCanvas();
-  }
+  };
 
   const refreshCanvas = () => {
     snakee.advance();
     if (snakee.checkCollision()) {
       gameOver();
     } else {
-      if (snakee.isEatingApple(applee)) {
+      if (snakee.isEatingApple(apple)) {
         score++;
         snakee.ateApple = true;
 
         do {
-          applee.setNewPosition();
-        } while (applee.isOnSnake(snakee));
+          apple.setNewPosition();
+        } while (apple.isOnSnake(snakee));
 
         if (score % 5 == 0) {
           speedUp();
@@ -62,14 +54,14 @@ window.onload = () => {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       drawScore();
       snakee.draw();
-      applee.draw();
+      apple.draw();
       timeOut = setTimeout(refreshCanvas, delay);
     }
-  }
+  };
 
   const speedUp = () => {
     delay /= 2;
-  }
+  };
 
   const gameOver = () => {
     ctx.save();
@@ -82,10 +74,18 @@ window.onload = () => {
     ctx.strokeText("Game Over", centreX, centreY - 180);
     ctx.fillText("Game Over", centreX, centreY - 180);
     ctx.font = "bold 30px sans-serif";
-    ctx.strokeText("Appuyer sur la touche Espace pour rejouer", centreX, centreY - 120);
-    ctx.fillText("Appuyer sur la touche Espace pour rejouer", centreX, centreY - 120);
+    ctx.strokeText(
+      "Appuyer sur la touche Espace pour rejouer",
+      centreX,
+      centreY - 120
+    );
+    ctx.fillText(
+      "Appuyer sur la touche Espace pour rejouer",
+      centreX,
+      centreY - 120
+    );
     ctx.restore();
-  }
+  };
 
   const drawScore = () => {
     ctx.save();
@@ -95,20 +95,23 @@ window.onload = () => {
     ctx.textBaseline = "middle";
     ctx.fillText(score.toString(), centreX, centreY);
     ctx.restore();
-  }
+  };
 
   const drawBlock = (ctx, position) => {
     const x = position[0] * blockSize;
     const y = position[1] * blockSize;
     ctx.fillRect(x, y, blockSize, blockSize);
-  }
+  };
 
-  function Snake(body, direction) {
-    this.body = body;
-    this.direction = direction;
-    this.ateApple = false;
+  class Snake {
 
-    this.draw = function () {
+    constructor(body, direction) {
+      this.body = body;
+      this.direction = direction;
+      this.ateApple = false;
+    }
+
+    draw() {
       ctx.save();
       ctx.fillStyle = "#0000ff";
       for (let i = 0; i < this.body.length; i++) {
@@ -117,7 +120,7 @@ window.onload = () => {
       ctx.restore();
     };
 
-    this.advance = function () {
+    advance() {
       const nextPosition = this.body[0].slice();
       switch (this.direction) {
         case "left":
@@ -133,16 +136,14 @@ window.onload = () => {
           nextPosition[1] -= 1;
           break;
         default:
-          throw ("invalid direction");
+          throw "invalid direction";
       }
       this.body.unshift(nextPosition);
-      if (!this.ateApple)
-        this.body.pop();
-      else
-        this.ateApple = false;
+      if (!this.ateApple) this.body.pop();
+      else this.ateApple = false;
     };
 
-    this.setDirection = function (newDirection) {
+    setDirection(newDirection) {
       let allowedDirections;
       switch (this.direction) {
         case "left":
@@ -154,14 +155,14 @@ window.onload = () => {
           allowedDirections = ["left", "right"];
           break;
         default:
-          throw ("invalid direction");
+          throw "invalid direction";
       }
       if (allowedDirections.indexOf(newDirection) > -1) {
         this.direction = newDirection;
       }
     };
 
-    this.checkCollision = function () {
+    checkCollision() {
       let wallCollision = false;
       let snakeCollision = false;
       const head = this.body[0];
@@ -186,20 +187,22 @@ window.onload = () => {
       return wallCollision || snakeCollision;
     };
 
-    this.isEatingApple = function (appleToEat) {
+    isEatingApple(appleToEat) {
       const head = this.body[0];
-      if (head[0] === appleToEat.position[0] && head[1] === appleToEat.position[1])
+      if (
+        head[0] === appleToEat.position[0] &&
+        head[1] === appleToEat.position[1]
+      )
         return true;
-      else
-        return false;
-    }
+      else return false;
+    };
 
   }
 
   function Apple(position) {
     this.position = position;
 
-    this.draw = function () {
+    this.draw = function() {
       const radius = blockSize / 2;
       const x = this.position[0] * blockSize + radius;
       const y = this.position[1] * blockSize + radius;
@@ -211,25 +214,27 @@ window.onload = () => {
       ctx.restore();
     };
 
-    this.setNewPosition = function () {
+    this.setNewPosition = function() {
       const newX = Math.round(Math.random() * (widthInBlocks - 1));
       const newY = Math.round(Math.random() * (heightInBlocks - 1));
       this.position = [newX, newY];
     };
 
-    this.isOnSnake = function (snakeToCheck) {
+    this.isOnSnake = function(snakeToCheck) {
       let isOnSnake = false;
       for (let i = 0; i < snakeToCheck.body.length; i++) {
-        if (this.position[0] === snakeToCheck.body[i][0] && this.position[1] === snakeToCheck.body[i][1]) {
+        if (
+          this.position[0] === snakeToCheck.body[i][0] &&
+          this.position[1] === snakeToCheck.body[i][1]
+        ) {
           isOnSnake = true;
         }
       }
       return isOnSnake;
     };
-
   }
 
-  document.onkeydown = (e) => {
+  document.onkeydown = e => {
     const key = e.keyCode;
     let newDirection;
     switch (key) {
@@ -255,4 +260,4 @@ window.onload = () => {
   };
 
   init();
-}
+};
