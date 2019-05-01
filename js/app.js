@@ -22,15 +22,6 @@ window.onload = () => {
       this.ateApple = false;
     }
 
-    draw() {
-      ctx.save();
-      ctx.fillStyle = "#0000ff";
-      for (let block of this.body) {
-        drawBlock(ctx, block);
-      }
-      ctx.restore();
-    };
-
     advance() {
       const nextPosition = this.body[0].slice();
       switch (this.direction) {
@@ -114,18 +105,6 @@ window.onload = () => {
       this.position = position;
     }
 
-    draw() {
-      const radius = blockSize / 2;
-      const x = this.position[0] * blockSize + radius;
-      const y = this.position[1] * blockSize + radius;
-      ctx.save();
-      ctx.fillStyle = "#33cc33";
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2, true);
-      ctx.fill();
-      ctx.restore();
-    };
-
     setNewPosition() {
       const newX = Math.round(Math.random() * (widthInBlocks - 1));
       const newY = Math.round(Math.random() * (heightInBlocks - 1));
@@ -145,6 +124,69 @@ window.onload = () => {
       return isOnSnake;
     };
 
+  }
+  
+  class Drawing {
+    static gameOver(ctx, centreX, centreY) {
+      ctx.save();
+      ctx.font = "bold 70px sans-serif";
+      ctx.fillStyle = "#000";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 5;
+      ctx.strokeText("Game Over", centreX, centreY - 180);
+      ctx.fillText("Game Over", centreX, centreY - 180);
+      ctx.font = "bold 30px sans-serif";
+      ctx.strokeText(
+        "Appuyer sur la touche Espace pour rejouer",
+        centreX,
+        centreY - 120
+      );
+      ctx.fillText(
+        "Appuyer sur la touche Espace pour rejouer",
+        centreX,
+        centreY - 120
+      );
+      ctx.restore();
+    };
+
+    static drawScore(ctx, centreX, centreY, score) {
+      ctx.save();
+      ctx.font = "bold 200px sans-serif";
+      ctx.fillStyle = "gray";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(score.toString(), centreX, centreY);
+      ctx.restore();
+    };
+
+    static drawSnake(ctx, blockSize, snake) {
+      ctx.save();
+      ctx.fillStyle = "#0000ff";
+      for (let block of snake.body) {
+        this.drawBlock(ctx, block, blockSize);
+      }
+      ctx.restore();
+    }
+
+    static drawApple(ctx, blockSize, apple) {
+      const radius = blockSize / 2;
+      const x = apple.position[0] * blockSize + radius;
+      const y = apple.position[1] * blockSize + radius;
+      ctx.save();
+      ctx.fillStyle = "#33cc33";
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+      ctx.fill();
+      ctx.restore();
+    };
+
+    static drawBlock(ctx, position, blockSize) {
+      const [x,y] = position;
+      ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+    };
+    
   }
 
   const init = () => {
@@ -170,7 +212,7 @@ window.onload = () => {
   const refreshCanvas = () => {
     snakee.advance();
     if (snakee.checkCollision()) {
-      gameOver();
+      Drawing.gameOver(ctx, centreX, centreY);
     } else {
       if (snakee.isEatingApple(apple)) {
         score++;
@@ -185,9 +227,9 @@ window.onload = () => {
         }
       }
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      drawScore();
-      snakee.draw();
-      apple.draw();
+      Drawing.drawScore(ctx, centreX, centreY, score);
+      Drawing.drawSnake(ctx, blockSize, snakee);
+      Drawing.drawApple(ctx, blockSize, apple);
       timeOut = setTimeout(refreshCanvas, delay);
     }
   };
@@ -196,45 +238,7 @@ window.onload = () => {
     delay /= 2;
   };
 
-  const gameOver = () => {
-    ctx.save();
-    ctx.font = "bold 70px sans-serif";
-    ctx.fillStyle = "#000";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 5;
-    ctx.strokeText("Game Over", centreX, centreY - 180);
-    ctx.fillText("Game Over", centreX, centreY - 180);
-    ctx.font = "bold 30px sans-serif";
-    ctx.strokeText(
-      "Appuyer sur la touche Espace pour rejouer",
-      centreX,
-      centreY - 120
-    );
-    ctx.fillText(
-      "Appuyer sur la touche Espace pour rejouer",
-      centreX,
-      centreY - 120
-    );
-    ctx.restore();
-  };
-
-  const drawScore = () => {
-    ctx.save();
-    ctx.font = "bold 200px sans-serif";
-    ctx.fillStyle = "gray";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(score.toString(), centreX, centreY);
-    ctx.restore();
-  };
-
-  const drawBlock = (ctx, position) => {
-    const [x,y] = position;
-    ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
-  };
-
+  
   document.onkeydown = e => {
     const key = e.keyCode;
     let newDirection;
