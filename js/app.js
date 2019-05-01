@@ -1,21 +1,73 @@
 window.onload = () => {
-  const canvasWidth = 900;
-  const canvasHeight = 600;
-  const blockSize = 30;
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  const widthInBlocks = canvasWidth / blockSize;
-  const heightInBlocks = canvasHeight / blockSize;
-  const centreX = canvasWidth / 2;
-  const centreY = canvasHeight / 2;
-  let delay;
-  let snakee;
-  let apple;
-  let score;
-  let timeOut;
+  class Game {
+    constructor(canvasWidth = 900, canvasHeight = 600) {
+      this.canvasWidth = canvasWidth;
+      this.canvasHeight = canvasHeight;
+      this.blockSize = 30;
+      this.canvas = document.createElement("canvas");
+      this.ctx = this.canvas.getContext("2d");
+      this.widthInBlocks = this.canvasWidth / this.blockSize;
+      this.heightInBlocks = this.canvasHeight / this.blockSize;
+      this.centreX = this.canvasWidth / 2;
+      this.centreY = this.canvasHeight / 2;
+      this.delay;
+      this.snakee;
+      this.apple;
+      this.score;
+      this.timeOut;
+    }
+
+    init() {
+      this.canvas.width = this.canvasWidth;
+      this.canvas.height = this.canvasHeight;
+      this.canvas.style.border = "30px solid gray";
+      this.canvas.style.margin = "50px auto";
+      this.canvas.style.display = "block";
+      this.canvas.style.backgroundColor = "#ddd";
+      document.body.appendChild(this.canvas);
+      this.launch();
+    }
+
+    launch() {
+      this.snakee = new Snake("right", [6, 4], [5, 4], [4, 4], [3, 4], [2, 4]);
+      this.apple = new Apple();
+      this.score = 0;
+      clearTimeout(this.timeOut);
+      this.delay = 100;
+      this.refreshCanvas();
+    }
+
+    refreshCanvas() {
+      this.snakee.advance();
+      if (this.snakee.checkCollision(this.widthInBlocks, this.heightInBlocks)) {
+        Drawing.gameOver(this.ctx, this.centreX, this.centreY);
+      } else {
+        if (this.snakee.isEatingApple(this.apple)) {
+          this.score++;
+          this.snakee.ateApple = true;
+
+          do {
+            this.apple.setNewPosition(this.widthInBlocks, this.heightInBlocks);
+          } while (this.apple.isOnSnake(this.snakee));
+
+          if (this.score % 5 == 0) {
+            this.speedUp();
+          }
+        }
+        this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        Drawing.drawScore(this.ctx, this.centreX, this.centreY, this.score);
+        Drawing.drawSnake(this.ctx, this.blockSize, this.snakee);
+        Drawing.drawApple(this.ctx, this.blockSize, this.apple);
+        this.timeOut = setTimeout(this.refreshCanvas.bind(this), this.delay);
+      }
+    }
+
+    speedUp() {
+      this.delay /= 2;
+    }
+  }
 
   class Snake {
-
     constructor(direction, ...body) {
       this.body = body;
       this.direction = direction;
@@ -43,7 +95,7 @@ window.onload = () => {
       this.body.unshift(nextPosition);
       if (!this.ateApple) this.body.pop();
       else this.ateApple = false;
-    };
+    }
 
     setDirection(newDirection) {
       let allowedDirections;
@@ -62,9 +114,9 @@ window.onload = () => {
       if (allowedDirections.indexOf(newDirection) > -1) {
         this.direction = newDirection;
       }
-    };
+    }
 
-    checkCollision() {
+    checkCollision(widthInBlocks, heightInBlocks) {
       let wallCollision = false;
       let snakeCollision = false;
       const [head, ...rest] = this.body;
@@ -80,12 +132,11 @@ window.onload = () => {
         wallCollision = true;
 
       for (let block of rest) {
-        if (snakeX === block[0] && snakeY === block[1])
-          snakeCollision = true;
+        if (snakeX === block[0] && snakeY === block[1]) snakeCollision = true;
       }
 
       return wallCollision || snakeCollision;
-    };
+    }
 
     isEatingApple(appleToEat) {
       const head = this.body[0];
@@ -95,37 +146,31 @@ window.onload = () => {
       )
         return true;
       else return false;
-    };
-
+    }
   }
 
   class Apple {
-
-    constructor(position = [10,10]) {
+    constructor(position = [10, 10]) {
       this.position = position;
     }
 
-    setNewPosition() {
+    setNewPosition(widthInBlocks, heightInBlocks) {
       const newX = Math.round(Math.random() * (widthInBlocks - 1));
       const newY = Math.round(Math.random() * (heightInBlocks - 1));
       this.position = [newX, newY];
-    };
+    }
 
     isOnSnake(snakeToCheck) {
       let isOnSnake = false;
       for (let block of snakeToCheck.body) {
-        if (
-          this.position[0] === block[0] &&
-          this.position[1] === block[1]
-        ) {
+        if (this.position[0] === block[0] && this.position[1] === block[1]) {
           isOnSnake = true;
         }
       }
       return isOnSnake;
-    };
-
+    }
   }
-  
+
   class Drawing {
     static gameOver(ctx, centreX, centreY) {
       ctx.save();
@@ -149,7 +194,7 @@ window.onload = () => {
         centreY - 120
       );
       ctx.restore();
-    };
+    }
 
     static drawScore(ctx, centreX, centreY, score) {
       ctx.save();
@@ -159,7 +204,7 @@ window.onload = () => {
       ctx.textBaseline = "middle";
       ctx.fillText(score.toString(), centreX, centreY);
       ctx.restore();
-    };
+    }
 
     static drawSnake(ctx, blockSize, snake) {
       ctx.save();
@@ -180,65 +225,17 @@ window.onload = () => {
       ctx.arc(x, y, radius, 0, Math.PI * 2, true);
       ctx.fill();
       ctx.restore();
-    };
+    }
 
     static drawBlock(ctx, position, blockSize) {
-      const [x,y] = position;
+      const [x, y] = position;
       ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
-    };
-    
+    }
   }
 
-  const init = () => {
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    canvas.style.border = "30px solid gray";
-    canvas.style.margin = "50px auto";
-    canvas.style.display = "block";
-    canvas.style.backgroundColor = "#ddd";
-    document.body.appendChild(canvas);
-    launch();
-  };
+  let myGame = new Game();
+  myGame.init();
 
-  const launch = () => {
-    snakee = new Snake( "right", [6, 4], [5, 4], [4, 4], [3, 4], [2, 4]);
-    apple = new Apple();
-    score = 0;
-    clearTimeout(timeOut);
-    delay = 100;
-    refreshCanvas();
-  };
-
-  const refreshCanvas = () => {
-    snakee.advance();
-    if (snakee.checkCollision()) {
-      Drawing.gameOver(ctx, centreX, centreY);
-    } else {
-      if (snakee.isEatingApple(apple)) {
-        score++;
-        snakee.ateApple = true;
-
-        do {
-          apple.setNewPosition();
-        } while (apple.isOnSnake(snakee));
-
-        if (score % 5 == 0) {
-          speedUp();
-        }
-      }
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      Drawing.drawScore(ctx, centreX, centreY, score);
-      Drawing.drawSnake(ctx, blockSize, snakee);
-      Drawing.drawApple(ctx, blockSize, apple);
-      timeOut = setTimeout(refreshCanvas, delay);
-    }
-  };
-
-  const speedUp = () => {
-    delay /= 2;
-  };
-
-  
   document.onkeydown = e => {
     const key = e.keyCode;
     let newDirection;
@@ -256,13 +253,13 @@ window.onload = () => {
         newDirection = "down";
         break;
       case 32:
-        launch();
+        myGame.launch();
         return;
       default:
         return;
     }
-    snakee.setDirection(newDirection);
+    myGame.snakee.setDirection(newDirection);
   };
 
-  init();
+  
 };
