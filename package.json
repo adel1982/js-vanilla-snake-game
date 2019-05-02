@@ -1,0 +1,17 @@
+{
+  "name": "Snakee",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/adel1982/js-vanilla-snake-game.git",
+  "author": "Adel Kamel <adelkamel1982@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --open",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0-alpha.11",
+    "webpack-cli": "^3.3.1",
+    "webpack-dev-server": "^3.3.1"
+  }
+}
