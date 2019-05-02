@@ -35,7 +35,7 @@ export default class Drawing {
 
 	static drawSnake(ctx, blockSize, snake) {
 		ctx.save();
-		ctx.fillStyle = "#0000ff";
+		ctx.fillStyle = "#ff0000";
 		for (let block of snake.body) {
 			this.drawBlock(ctx, block, blockSize);
 		}
