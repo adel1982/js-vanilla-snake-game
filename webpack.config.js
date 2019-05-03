@@ -7,6 +7,20 @@ module.exports = {
 		filename: "bundle.js"
 	},
 	devServer: {
-		contentBase: path.resolve(__dirname, "dist")
-	}
+		contentBase: path.resolve(__dirname, "dist"),
+	},
+	// module: {
+	// 	rules: [
+	// 		{
+	// 			test: /\.js$/,
+	// 			exclude: /node_modules/,
+	// 			use: {
+	// 				loader: 'babel-loader',
+	// 				options: {
+	// 					presets: ["env"]
+	// 				}
+	// 			} 
+	// 		}
+	// 	]
+	// }
 }
